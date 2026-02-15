@@ -12,6 +12,11 @@ A cli built for [nucleus-shell](github.com/xZepyx/nucleus-shell).
 
 ## Installation
 
+### From Aur
+```
+yay -S nucleus-shell
+```
+
 ### From Source
 
 ```
@@ -21,6 +26,10 @@ cmake -B build -S .
 cmake --build build -- -j$(nproc)
 sudo cmake --install build
 ```
+
+> [!NOTE]
+> Any other packages on the aur are not official and not supported.
+> The official package name is `nucleus-shell` on aur.
 
 ### Dependencies
 
