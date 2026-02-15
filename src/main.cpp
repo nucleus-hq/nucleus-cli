@@ -216,7 +216,14 @@ int main(int argc, char *argv[]) {
                 prompt::Fail("Usage: nucleus theme switch <themeName>");
             }
             i++;
-        } 
+        }
+	else if (arg == "-h" || arg == "--help") {
+	    printInfo();
+	    i++;
+	}
+	else {
+           i+=argc;
+	} 
     }
 
     return 0;
