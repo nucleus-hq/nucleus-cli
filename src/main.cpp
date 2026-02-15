@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
             i++;
         }
 	else if (arg == "-h" || arg == "--help") {
-	    printInfo();
+	    printUsage();
 	    i++;
 	}
 	else {
