@@ -3,7 +3,7 @@
 
 namespace update {
 
-enum class UpdateMode { Stable, Edge, Git };
+enum class UpdateMode { Stable, Edge, Tag, Git };
 
 // Main update function
 void perform(UpdateMode mode, const std::string& gitTag = "");
