@@ -191,14 +191,15 @@ int main(int argc, char *argv[]) {
       std::cout << "Select the version to install:\n";
       std::cout << "1. Latest\n";
       std::cout << "2. Edge\n";
-      std::cout << "3. Git\n";
+      std::cout << "3. Tag\n";
+      std::cout << "4. Git\n";
 
       int choice = 0;
       while (true) {
         std::cout << "[?] Choice: ";
         std::cin >> choice;
 
-        if (choice >= 1 && choice <= 3)
+        if (choice >= 1 && choice <= 4)
           break;
         std::cout << "Invalid choice, try again.\n";
       }
@@ -206,10 +207,11 @@ int main(int argc, char *argv[]) {
       update::UpdateMode mode = update::choiceToMode(choice);
       std::string gitTag;
 
-      // If Git mode, ask for tag
-      if (mode == update::UpdateMode::Git) {
-        std::cout << "[?] Enter Git tag: ";
-        std::cin >> gitTag;
+      // If Tag mode, ask for tag
+      if (mode == update::UpdateMode::Tag)
+      {
+          std::cout << "[?] Enter tag (ex: v0.7.6): ";
+          std::cin >> gitTag;
       }
 
       // Perform the update
