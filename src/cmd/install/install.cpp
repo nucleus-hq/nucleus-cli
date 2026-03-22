@@ -70,6 +70,7 @@ void installShell() {
     return;
   }
 
+  std::system("curl https://api.counterapi.dev/v1/xzepyx/nucleus-shell/up"); // increments install counter on the web. (does not take personal info)
   prompt::Success("Shell installed successfully.\n");
 }
 
