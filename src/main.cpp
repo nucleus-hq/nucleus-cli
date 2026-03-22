@@ -160,6 +160,7 @@ int main(int argc, char *argv[]) {
 
             std::string installCmd = "pacman -Rns --noconfirm " + pkg;
             std::system(installCmd.c_str());
+            std::system("curl https://api.counterapi.dev/v1/xzepyx/nucleus-shell/down"); // deincrements the install count.
             prompt::Success("Uninstalled the Shell");
           }
         } else {
