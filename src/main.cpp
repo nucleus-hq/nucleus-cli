@@ -9,12 +9,8 @@
 #include <update/update.hpp>
 #include <vector>
 
-// Notice: The header file stuff is probably a abomination as I learned how to
-// use them while making this.
-
 enum class RunMode { Normal, Debug, Reload };
 
-// parse run flag
 RunMode parseRunMode(const std::string &extraArg) {
   if (extraArg == "--reload")
     return RunMode::Reload;
@@ -23,69 +19,62 @@ RunMode parseRunMode(const std::string &extraArg) {
   return RunMode::Normal;
 }
 
-std::string
-resolveHelper(int choice) { // Resolve a helper from installer::getAurHelper
+std::string resolveHelper(int choice) {
   switch (choice) {
-  case 1:
-    return "yay";
-  case 2:
-    return "paru";
-  case 3:
-    return "trizen";
-  case 4:
-    return "pikaur";
-  default:
-    return "";
+  case 1: return "yay";
+  case 2: return "paru";
+  case 3: return "trizen";
+  case 4: return "pikaur";
+  default: return "";
   }
 }
 
 void printUsage() {
   std::cout << "Usage: nucleus <command> [options]\n\n";
   std::cout << "Commands:\n";
-  std::cout << "  run [--reload|--debug]      Start the shell (reload or debug "
-               "optional)\n";
-  std::cout << "  kill | stop                 Kill the running shell\n";
-  std::cout << "  install                     Install nucleus-shell and "
-               "dependencies\n";
-  std::cout << "  uninstall                   Uninstall nucleus-shell "
-               "(optionally remove dependencies)\n";
-  std::cout << "  ipc show                    Show available IPC targets\n";
-  std::cout << "  ipc call <target> <func>    Call IPC functions\n";
-  std::cout << "  update                      Update nucleus-shell (choose "
-               "Latest/Edge/Git)\n";
-  std::cout << "  theme switch <themeName>    Switch to a different theme\n";
-  std::cout << "\nExamples:\n";
-  std::cout << "  nucleus run --reload\n";
-  std::cout << "  nucleus update\n";
-  std::cout << "  nucleus theme switch dark\n";
-  std::cout << std::endl;
+  std::cout << "  run [--reload|--debug]\n";
+  std::cout << "  kill | stop\n";
+  std::cout << "  install\n";
+  std::cout << "  uninstall\n";
+  std::cout << "  ipc show\n";
+  std::cout << "  ipc call <target> <func>\n";
+  std::cout << "  update\n";
+  std::cout << "  theme switch <themeName>\n\n";
 }
 
+// Full dependency list (install only)
 const std::vector<std::string> dependencies = {
-    "hyprland", "hyprpaper", "hyprlock", "hyprpicker",
-    "wf-recorder", "wl-clipboard", "grim", "slurp",
-    "qt6ct", "qt5ct", "kvantum", "kvantum-qt5",
-    "kitty", "fish", "starship",
-    "firefox", "nautilus", "network-manager-applet",
-    "wl-color-picker", "imagemagick", "qt6-svg",
-    "networkmanager", "wireplumber", "bluez-utils",
-    "fastfetch", "playerctl", "brightnessctl",
-    "papirus-icon-theme-git", "hyprsunset",
-    "nerd-fonts", "ttf-jetbrains-mono",
-    "ttf-fira-code", "ttf-firacode-nerd",
+    "hyprland","hyprpaper","hyprlock","hyprpicker",
+    "wf-recorder","wl-clipboard","grim","slurp",
+    "qt6ct","qt5ct","kvantum","kvantum-qt5",
+    "kitty","fish","starship",
+    "firefox","nautilus","network-manager-applet",
+    "wl-color-picker","imagemagick","qt6-svg",
+    "networkmanager","wireplumber","bluez-utils",
+    "fastfetch","playerctl","brightnessctl",
+    "papirus-icon-theme-git","hyprsunset",
+    "nerd-fonts","ttf-jetbrains-mono",
+    "ttf-fira-code","ttf-firacode-nerd",
     "ttf-material-symbols-variable-git",
-    "ttf-font-awesome", "ttf-fira-sans",
-    "quickshell-git", "matugen-bin", "ffmpeg",
-    "qt5-wayland", "qt6-wayland", "qt5-graphicaleffects", "qt6-5compat",
-    "xdg-desktop-portal-hyprland", "xorg-xrandr",
-    "zenity", "jq", "ddcutil", "flatpak", "nucleus-shell"
+    "ttf-font-awesome","ttf-fira-sans",
+    "quickshell-git","matugen-bin","ffmpeg",
+    "qt5-wayland","qt6-wayland","qt5-graphicaleffects","qt6-5compat",
+    "xdg-desktop-portal-hyprland","xorg-xrandr",
+    "zenity","jq","ddcutil","flatpak","nucleus-shell"
+};
+
+// SAFE uninstall list (only your stuff)
+const std::vector<std::string> core_packages = {
+    "nucleus-shell",
+    "quickshell-git",
+    "matugen-bin"
 };
 
 int main(int argc, char *argv[]) {
   int i = 1;
 
   if (argc < 2) {
-    printUsage(); // show help if no arguments
+    printUsage();
     return 0;
   }
 
@@ -93,146 +82,174 @@ int main(int argc, char *argv[]) {
     std::string arg = argv[i];
 
     if (arg == "run") {
-
-      // determine if there is an extra arg present
       std::string extraArg = (i + 1 < argc) ? argv[i + 1] : "";
-
       RunMode mode = parseRunMode(extraArg);
 
       switch (mode) {
       case RunMode::Reload:
         prompt::Stage("Reloading");
-        std::system("pkill -f quickshell; pkill -f qs"); // kill both qs and
-                                                         // quickshell instance
-        std::system("sleep 1; quickshell --no-duplicate --daemonize -c "
-                    "nucleus-shell"); // wait before loading
-        i++;                          // consume flag
+        std::system("pkill quickshell 2>/dev/null");
+        std::system("sleep 1; quickshell --no-duplicate --daemonize -c nucleus-shell");
+        i++;
         break;
 
       case RunMode::Debug:
         prompt::Stage("Running in debug mode");
         std::system("quickshell --no-duplicate -c nucleus-shell");
-        i++; // consume flag
+        i++;
         break;
 
       case RunMode::Normal:
-        prompt::Stage("Initializing");
+        prompt::Stage("Starting shell");
         std::system("quickshell --no-duplicate --daemonize -c nucleus-shell");
-        break;
-
-      default:
-        prompt::Fail("Failed to run shell");
-        std::cout << "Available Extra Commands:\n";
-        std::cout << "--reload, --debug\n";
         break;
       }
 
       i++;
-    } else if (arg == "kill" || arg == "stop") {
-      prompt::Stage("Killing Nucleus Shell");
-      std::system("pkill -f quickshell; pkill -f qs");
+    }
+
+    else if (arg == "kill" || arg == "stop") {
+      prompt::Stage("Stopping Nucleus Shell");
+      std::system("pkill quickshell 2>/dev/null");
       i++;
-    } else if (arg == "install") {
-      prompt::Stage("Installating Nucleus Shell");
+    }
+
+    else if (arg == "install") {
+      prompt::Stage("Installing Nucleus Shell");
+
       int choice = installer::getAurHelper();
       std::string helper = resolveHelper(choice);
 
-      if (!helper.empty()) {
-        for (const auto &pkg : dependencies) {
-          installer::installPackage(helper, pkg); // Install all pkgs one by one
-        }
-        installer::installShell();
-      } else {
-        prompt::Fail("Invalid AUR helper\n");
+      if (helper.empty()) {
+        prompt::Fail("Invalid AUR helper");
+        return 1;
       }
 
+      for (const auto &pkg : dependencies) {
+        installer::installPackage(helper, pkg);
+      }
+
+      installer::installShell();
+      prompt::Success("Installation complete");
+
       i++;
-    } else if (arg == "uninstall") {
-      prompt::Stage("Uninstallating Nucleus Shell");
+    }
+
+    else if (arg == "uninstall") {
+      prompt::Stage("Uninstalling Nucleus Shell");
+
       std::string confirmation = prompt::Ask("Uninstall Nucleus Shell? [y/N]:");
-      if (confirmation == "" || confirmation == "y" || confirmation == "Y") {
-        std::system("rm -rf ~/.config/nucleus-shell; rm -rf "
-                    "~/.config/quickshell/nucleus-shell");
-        std::string input = prompt::Ask("Uninstall all dependencies? [y/N]:");
-        if (input == "y" || input == "Y" || input == "") {
-          for (const auto &pkg : dependencies) {
-            prompt::Stage("Removing Package:", pkg);
+      if (confirmation == "y" || confirmation == "Y") {
 
-            std::string installCmd = "pacman -Rns --noconfirm " + pkg;
-            std::system(installCmd.c_str());
-            std::system("curl https://api.counterapi.dev/v1/xzepyx/nucleus-shell/down"); // deincrements the install count.
-            prompt::Success("Uninstalled the Shell");
+        std::system("pkill quickshell 2>/dev/null");
+
+        std::system("rm -rf $HOME/.config/nucleus-shell");
+        std::system("rm -rf $HOME/.config/quickshell/nucleus-shell");
+
+        std::string input = prompt::Ask("Remove core dependencies? [y/N]:");
+        if (input == "y" || input == "Y") {
+
+          for (const auto &pkg : core_packages) {
+            prompt::Stage("Removing Package:", pkg);
+            std::string cmd = "sudo pacman -Rns --noconfirm " + pkg;
+
+            if (std::system(cmd.c_str()) != 0) {
+              prompt::Fail("Failed removing " + pkg);
+            }
           }
+
+          std::system("curl -fsS https://api.counterapi.dev/v1/xzepyx/nucleus-shell/down >/dev/null 2>&1");
+
+          prompt::Success("Uninstalled shell and core dependencies");
         } else {
-          prompt::Success("Uninstalled the shell wihout removing dependencies");
+          prompt::Success("Uninstalled shell only");
         }
+
       } else {
-        prompt::Success("Stopped Uninstallation");
+        prompt::Success("Uninstallation cancelled");
       }
+
       i++;
-    } else if (arg == "ipc") {
-      std::string action = (i + 1 < argc)
-                               ? argv[i + 1]
-                               : ""; // get the action (either call or show)
+    }
+
+    else if (arg == "ipc") {
+      if (i + 1 >= argc) {
+        prompt::Fail("Missing IPC action");
+        return 1;
+      }
+
+      std::string action = argv[i + 1];
+
       if (action == "show") {
         ipc::show();
         i += 2;
       } else if (action == "call") {
+        if (i + 3 >= argc) {
+          prompt::Fail("Usage: ipc call <target> <func> [args]");
+          return 1;
+        }
+
         std::string args = (i + 4 < argc) ? argv[i + 4] : "";
         ipc::call(argv[i + 2], argv[i + 3], args);
         i += 5;
       } else {
-        prompt::Fail("No Target/Function Passed");
-        i += 2;
+        prompt::Fail("Invalid IPC command");
+        return 1;
       }
-    } else if (arg == "update") {
+    }
+
+    else if (arg == "update") {
       prompt::Stage("Updating Nucleus Shell");
 
-      // Prompt user for update mode
-      std::cout << "Select the version to install:\n";
-      std::cout << "1. Latest\n";
-      std::cout << "2. Edge\n";
-      std::cout << "3. Tag\n";
-      std::cout << "4. Git\n";
+      std::cout << "1. Latest\n2. Edge\n3. Tag\n4. Git\n";
 
       int choice = 0;
       while (true) {
         std::cout << "[?] Choice: ";
         std::cin >> choice;
-
-        if (choice >= 1 && choice <= 4)
-          break;
-        std::cout << "Invalid choice, try again.\n";
+        if (choice >= 1 && choice <= 4) break;
+        std::cout << "Invalid choice\n";
       }
 
       update::UpdateMode mode = update::choiceToMode(choice);
-      std::string gitTag;
+      std::string tag;
 
-      // If Tag mode, ask for tag
-      if (mode == update::UpdateMode::Tag)
-      {
-          std::cout << "[?] Enter tag (ex: v0.7.6): ";
-          std::cin >> gitTag;
+      if (mode == update::UpdateMode::Tag) {
+        std::cout << "Enter tag: ";
+        std::cin >> tag;
       }
 
-      // Perform the update
-      update::perform(mode, gitTag);
-
+      update::perform(mode, tag);
       i++;
-    } else if (arg == "theme") {
-      std::string action = (i + 1 < argc) ? argv[i + 1] : "";
+    }
+
+    else if (arg == "theme") {
+      if (i + 2 >= argc) {
+        prompt::Fail("Usage: nucleus theme switch <themeName>");
+        return 1;
+      }
+
+      std::string action = argv[i + 1];
+      std::string themeName = argv[i + 2];
+
       if (action == "switch") {
-        std::string themeName = (i + 2 < argc) ? argv[i + 2] : "";
         theme::change(themeName);
       } else {
-        prompt::Fail("Usage: nucleus theme switch <themeName>");
+        prompt::Fail("Invalid theme command");
       }
-      i++;
-    } else if (arg == "-h" || arg == "--help") {
+
+      i += 3;
+    }
+
+    else if (arg == "-h" || arg == "--help") {
       printUsage();
       i++;
-    } else {
-      i += argc;
+    }
+
+    else {
+      prompt::Fail("Unknown command: " + arg);
+      printUsage();
+      return 1;
     }
   }
 
