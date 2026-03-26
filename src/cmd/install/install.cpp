@@ -47,7 +47,7 @@ void installPackage(const std::string &helper, const std::string &pkg) {
 
 
 void installShell() {
-  const std::string repoUrl = "https://github.com/xZepyx/nucleus-shell.git";
+  const std::string repoUrl = "https://github.com/nucleus-hq/nucleus-shell.git";
   const std::string cloneDir = "/tmp/nucleus-shell";
 
   // Clone repository
@@ -70,7 +70,7 @@ void installShell() {
     return;
   }
 
-  std::system("curl https://api.counterapi.dev/v1/xzepyx/nucleus-shell/up"); // increments install counter on the web. (does not take personal info)
+  std::system("curl https://api.counterapi.dev/v1//nucleus-shell/up"); // increments install counter on the web. (does not take personal info)
   prompt::Success("Shell installed successfully.\n");
 }
 
