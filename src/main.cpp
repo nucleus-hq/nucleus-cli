@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
         std::system("rm -rf $HOME/.config/nucleus-shell");
         std::system("rm -rf $HOME/.config/quickshell/nucleus-shell");
 
-        std::string input = prompt::Ask("Remove core dependencies? [y/N]:");
+        std::string input = prompt::Ask("Remove system core dependencies? (not recommended) [y/N]:");
         if (input == "y" || input == "Y") {
 
           for (const auto &pkg : core_packages) {
