@@ -22,7 +22,7 @@ inline const std::string CONFIG =
 inline const std::string QS_DIR =
     std::string(getenv("HOME")) + "/.config/quickshell/nucleus-shell";
 
-inline const std::string REPO = "xZepyx/nucleus-shell";
+inline const std::string REPO = "nucleus-hq/nucleus-shell";
 
 inline const std::string API =
     "https://api.github.com/repos/" + REPO + "/releases";
