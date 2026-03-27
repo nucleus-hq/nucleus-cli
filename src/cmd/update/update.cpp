@@ -97,11 +97,12 @@ UpdateMode choiceToMode(int choice)
         case 2: return UpdateMode::Edge;
         case 3: return UpdateMode::Tag;
         case 4: return UpdateMode::Git;
+        case 5: return UpdateMode::GitBranch;
         default: throw std::runtime_error("Invalid update choice");
     }
 }
 
-void perform(UpdateMode mode, const std::string& inputTag)
+void perform(UpdateMode mode, const std::string& inputTag, const std::string& branch)
 {
     if (!fs::exists(CONFIG))
         throw std::runtime_error("configuration.json not found");
@@ -135,6 +136,47 @@ void perform(UpdateMode mode, const std::string& inputTag)
         std::string cloneCmd =
             "git clone --depth=1 https://github.com/" + REPO +
             ".git " + repo_dir.string();
+
+        console::spinner("Cloning repository", cloneCmd);
+
+        if (!fs::exists(src_dir))
+            throw std::runtime_error("nucleus-shell directory missing in repo");
+
+        std::string installCmd =
+            "rm -rf '" + QS_DIR + "' && "
+            "mkdir -p '" + QS_DIR + "' && "
+            "cp -r '" + src_dir.string() + "'/* '" + QS_DIR + "'";
+
+        console::spinner("Installing files", installCmd);
+
+        cfgJson["shell"]["version"] = latest;
+
+        std::ofstream out(CONFIG);
+        out << cfgJson.dump(4);
+
+        console::spinner("Reloading shell",
+            "killall quickshell &>/dev/null || true; "
+            "nohup quickshell -c nucleus-shell &>/dev/null & disown");
+
+        std::cout << "[✓] Updated to nucleus-shell git-rc\n";
+
+        return;
+    }
+
+    if (mode == UpdateMode::GitBranch)
+    {
+        latest = "RC";
+
+        fs::path repo_dir = tmp / "repo";
+        fs::path src_dir = repo_dir / "quickshell" / "nucleus-shell";
+
+        if (branch.empty()) {
+            throw std::runtime_error("No tag provided");
+        }
+
+        std::string cloneCmd =
+            "git clone --depth=1 https://github.com/" + REPO +
+            ".git " + "-b " + branch + " " + repo_dir.string();
 
         console::spinner("Cloning repository", cloneCmd);
 

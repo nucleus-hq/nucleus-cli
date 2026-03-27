@@ -42,32 +42,63 @@ void printUsage() {
   std::cout << "  theme switch <themeName>\n\n";
 }
 
-// Full dependency list (install only)
+// CORE packages (system / base stack — install but NEVER auto-remove)
+const std::vector<std::string> core_packages = {
+    // Display server / compositor base
+    "hyprland",
+    "xdg-desktop-portal-hyprland",
+    "xorg-xrandr",
+
+    // Qt / UI stack
+    "qt6ct","qt5ct",
+    "qt5-wayland","qt6-wayland",
+    "qt5-graphicaleffects","qt6-5compat","qt6-svg",
+
+    // System services
+    "networkmanager",      // :contentReference[oaicite:0]{index=0}
+    "wireplumber",
+    "bluez-utils",
+
+    // Core desktop integration
+    "network-manager-applet",
+    "wl-clipboard",
+
+    // Essential tools
+    "jq","zenity","flatpak"
+};
+
+
+// PROJECT dependencies (safe to install/remove with your project)
 const std::vector<std::string> dependencies = {
-    "hyprland","hyprpaper","hyprlock","hyprpicker",
-    "wf-recorder","wl-clipboard","grim","slurp",
-    "qt6ct","qt5ct","kvantum","kvantum-qt5",
+    // Your stack
+    "nucleus-shell",
+    "quickshell-git",
+    "matugen-bin",
+
+    // Hypr ecosystem extras
+    "hyprpaper","hyprlock","hyprpicker","hyprsunset",
+
+    // Wayland utilities
+    "wf-recorder","grim","slurp","wl-color-picker",
+
+    // Theming
+    "kvantum","kvantum-qt5","papirus-icon-theme-git",
+
+    // Terminal / shell
     "kitty","fish","starship",
-    "firefox","nautilus","network-manager-applet",
-    "wl-color-picker","imagemagick","qt6-svg",
-    "networkmanager","wireplumber","bluez-utils",
-    "fastfetch","playerctl","brightnessctl",
-    "papirus-icon-theme-git","hyprsunset",
+
+    // Apps
+    "firefox","nautilus",
+
+    // Media / system utils
+    "imagemagick","ffmpeg",
+    "playerctl","brightnessctl","ddcutil","fastfetch",
+
+    // Fonts
     "nerd-fonts","ttf-jetbrains-mono",
     "ttf-fira-code","ttf-firacode-nerd",
     "ttf-material-symbols-variable-git",
-    "ttf-font-awesome","ttf-fira-sans",
-    "quickshell-git","matugen-bin","ffmpeg",
-    "qt5-wayland","qt6-wayland","qt5-graphicaleffects","qt6-5compat",
-    "xdg-desktop-portal-hyprland","xorg-xrandr",
-    "zenity","jq","ddcutil","flatpak","nucleus-shell"
-};
-
-// SAFE uninstall list (only your stuff)
-const std::vector<std::string> core_packages = {
-    "nucleus-shell",
-    "quickshell-git",
-    "matugen-bin"
+    "ttf-font-awesome","ttf-fira-sans"
 };
 
 int main(int argc, char *argv[]) {
@@ -146,7 +177,7 @@ int main(int argc, char *argv[]) {
         std::system("rm -rf $HOME/.config/nucleus-shell");
         std::system("rm -rf $HOME/.config/quickshell/nucleus-shell");
 
-        std::string input = prompt::Ask("Remove system core dependencies? (not recommended) [y/N]:");
+        std::string input = prompt::Ask("Remove system dependencies? (not recommended) [y/N]:");
         if (input == "y" || input == "Y") {
 
           for (const auto &pkg : core_packages) {
@@ -201,13 +232,13 @@ int main(int argc, char *argv[]) {
     else if (arg == "update") {
       prompt::Stage("Updating Nucleus Shell");
 
-      std::cout << "1. Latest\n2. Edge\n3. Tag\n4. Git\n";
+      std::cout << "1. Latest\n2. Edge\n3. Tag\n4. Git\n5. Git Branch\n";
 
       int choice = 0;
       while (true) {
         std::cout << "[?] Choice: ";
         std::cin >> choice;
-        if (choice >= 1 && choice <= 4) break;
+        if (choice >= 1 && choice <= 5) break;
         std::cout << "Invalid choice\n";
       }
 
@@ -219,7 +250,14 @@ int main(int argc, char *argv[]) {
         std::cin >> tag;
       }
 
-      update::perform(mode, tag);
+      std::string branchName;
+
+      if (mode == update::UpdateMode::GitBranch) {
+        std::cout << "Enter branch name: ";
+        std::cin >> branchName;
+      }
+
+      update::perform(mode, tag, branchName);
       i++;
     }
 
@@ -232,7 +270,7 @@ int main(int argc, char *argv[]) {
       std::string action = argv[i + 1];
       std::string themeName = argv[i + 2];
 
-      if (action == "switch") {
+      if (action == "switch" || action == "change" || action == "set") {
         theme::change(themeName);
       } else {
         prompt::Fail("Invalid theme command");
