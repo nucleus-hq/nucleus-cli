@@ -1,6 +1,6 @@
 # Nucleus CLI
 
-A cli built for [nucleus-shell](github.com/xZepyx/nucleus-shell).
+A cli built for [nucleus-shell](github.com/nucleus-hq/nucleus-shell).
 
 ## Features
 
